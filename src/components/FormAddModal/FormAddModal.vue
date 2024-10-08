@@ -19,17 +19,31 @@
     </div>
     <div class="flex gap-4 flex-col">
       <div>Описание работы :</div>
-      <el-input v-model="workTasks.name" placeholder="Название работы" />
-      <el-input v-model="workTasks.price" placeholder="Цена работы" />
-
-      <el-button type="success" class="mx-auto" round>+</el-button>
+      <div v-for="(workTask, index) in workTasks" class="flex gap-4">
+        <el-input v-model="workTask.name" placeholder="Название работы" />
+        <el-input v-model="workTask.price" placeholder="Цена работы" />
+        <el-button @click="deleteWorkTask(index)" type="danger" circle>
+          <el-icon><Delete /></el-icon
+        ></el-button>
+      </div>
+      <el-button @click="addWorkTask" type="success" class="mx-auto" circle
+        ><el-icon><Plus /></el-icon
+      ></el-button>
     </div>
     <div class="flex gap-4 flex-col">
       <div>Детали :</div>
-      <el-input v-model="parts.name" placeholder="Название детали" />
-      <el-input v-model="parts.price" placeholder="Цена детали" />
-      <el-input v-model="parts.result_price" placeholder="Цена детали" />
-      <el-button type="success" class="mx-auto" round>+</el-button>
+      <div v-for="(part, index) in parts" class="flex gap-4">
+        <el-input v-model="part.name" placeholder="Название детали" />
+        <el-input v-model="part.price" placeholder="Цена детали" />
+        <el-input v-model="part.result_price" placeholder="Цена детали +20%" />
+        <el-button @click="deletePart(index)" type="danger" circle>
+          <el-icon><Delete /></el-icon
+        ></el-button>
+      </div>
+
+      <el-button @click="addPart" type="success" class="mx-auto" circle
+        ><el-icon><Plus /></el-icon
+      ></el-button>
     </div>
     <div>
       <div>Предоплата :</div>
@@ -37,11 +51,23 @@
     </div>
     <div class="flex gap-4 flex-col">
       <div>Записи :</div>
-      <el-input v-model="notes.description" />
-      <el-button type="success" class="mx-auto" round>+</el-button>
+      <div v-for="(note, index) in notes" class="flex gap-4">
+        <el-input v-model="note.description" type="textarea" />
+        <el-button @click="deleteNote(index)" type="danger" circle
+          ><el-icon><Delete /></el-icon
+        ></el-button>
+      </div>
+      <el-button @click="addNote" type="success" class="mx-auto" circle
+        ><el-icon><Plus /></el-icon
+      ></el-button>
     </div>
     <div>
-      <el-button type="primary" @click="dialogVisible = false" class="m-auto">Добавить</el-button>
+      <el-button
+        type="primary"
+        @click="sendForm(form, workTasks, parts, notes), (dialogVisible = false)"
+        class="m-auto"
+        >Добавить</el-button
+      >
 
       <el-button @click="dialogVisible = false" plain> Отмена </el-button>
     </div>
@@ -53,13 +79,51 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {},
+  emits: ['send-form'],
   data() {
     return {
       dialogVisible: false,
-      form: {} as Tasks.Task,
-      workTasks: {} as Tasks.workTask,
-      parts: {} as Tasks.partTask,
-      notes: {} as Tasks.noteTask
+      form: {
+        mark: '',
+        num: '',
+        vin: '',
+        date: '',
+        prepaid: 0,
+        paidstate: 0
+      } as Tasks.Task,
+      workTasks: [] as Tasks.workTask[],
+      parts: [] as Tasks.partTask[],
+      notes: [] as Tasks.noteTask[]
+    }
+  },
+  methods: {
+    addWorkTask() {
+      this.workTasks.push({ name: '', price: 0 })
+    },
+    deleteWorkTask(index: number) {
+      this.workTasks.splice(index, 1)
+    },
+    addPart() {
+      this.parts.push({ name: '', price: 0, result_price: 0 })
+    },
+    deletePart(index: number) {
+      this.parts.splice(index, 1)
+    },
+    addNote() {
+      this.notes.push({ description: '' })
+    },
+    deleteNote(index: number) {
+      this.notes.splice(index, 1)
+    },
+    sendForm(form: object, workTasks: Array<object>, parts: Array<object>, notes: Array<object>) {
+      let fullform = Object.assign(
+        {},
+        form,
+        { workTasks: workTasks },
+        { parts: parts },
+        { notes: notes }
+      )
+      this.$emit('send-form', fullform)
     }
   }
 })

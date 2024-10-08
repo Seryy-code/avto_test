@@ -1,7 +1,7 @@
 declare module Tasks {
   interface Task {
     mark: string
-    num: number
+    num: string
     vin: string
     date: string
     workTasks: workTask[]
