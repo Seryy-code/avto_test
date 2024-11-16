@@ -1,5 +1,6 @@
 declare module Tasks {
   interface Task {
+    id: number
     mark: string
     num: string
     vin: string
@@ -11,15 +12,18 @@ declare module Tasks {
     paidstate: number
   }
   interface workTask {
+    // id: number
     name: string
     price: number
   }
   interface partTask {
+    // id: number
     name: string
     price: number
     result_price: number
   }
   interface noteTask {
+    // id: number
     description: string
   }
 }

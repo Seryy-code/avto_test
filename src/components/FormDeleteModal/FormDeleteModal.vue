@@ -1,40 +1,30 @@
 <template>
-  <el-button @click="dialogVisible = true" type="danger" plain> Удалить </el-button>
   <el-dialog
-    class="z-10"
-    v-model="dialogVisible"
+    @close="$emit('close')"
+    v-model="isModal"
+    close-on-click-modal
     title="Вы уверены что хотите удалить данную запись?"
   >
     <h1>Марка машины - {{ row.mark }}</h1>
     <h1>Номер машины - {{ row.num }}</h1>
-    <el-button @click="rowDelete(), (dialogVisible = false)" type="danger"> Подтвердить </el-button>
-    <el-button @click="dialogVisible = false" plain> Отмена </el-button>
+    <el-button @click="$emit('delete', $props.row)" type="danger"> Подтвердить </el-button>
+    <el-button @click="$emit('close')" plain> Отмена </el-button>
   </el-dialog>
 </template>
 
 <script lang="ts">
-import { Delete } from '@element-plus/icons-vue'
-import { defineComponent } from 'vue'
+import { defineComponent, type PropType } from 'vue'
 
 export default defineComponent({
-  emits: ['row-delete'],
-
+  emits: ['close', 'delete'],
   props: {
     row: {
-      type: Object as () => Tasks.Task,
+      type: Object as PropType<Tasks.Task>,
       required: true
-    }
-  },
-  data() {
-    return {
-      dialogVisible: false
-    }
-  },
-  methods: {
-    rowDelete() {
-      console.log(this.$props.row)
-
-      this.$emit('row-delete')
+    },
+    isModal: {
+      type: Boolean,
+      required: true
     }
   }
 })
