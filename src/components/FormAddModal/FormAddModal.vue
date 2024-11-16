@@ -1,6 +1,10 @@
 <template>
-  <el-button @click="dialogVisible = true" type="success"> Создать </el-button>
-  <el-dialog v-model="dialogVisible" title="Введите данные машины:">
+  <el-dialog
+    @close="$emit('close')"
+    v-model="isModal"
+    close-on-click-modal
+    title="Введите данные машины:"
+  >
     <div>
       <div>Марка :</div>
       <el-input v-model="form.mark" />
@@ -62,24 +66,27 @@
       ></el-button>
     </div>
     <div>
-      <el-button
-        type="primary"
-        @click="sendForm(form, workTasks, parts, notes), (dialogVisible = false)"
-        class="m-auto"
+      <el-button type="primary" @click="sendForm(form, workTasks, parts, notes)" class="m-auto"
         >Добавить</el-button
       >
+      <!-- @click="sendForm(form, workTasks, parts, notes)",  -->
 
-      <el-button @click="dialogVisible = false" plain> Отмена </el-button>
+      <el-button @click="$emit('close'), clearForm()" plain> Отмена </el-button>
     </div>
   </el-dialog>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, type PropType } from 'vue'
 
 export default defineComponent({
-  props: {},
-  emits: ['send-form'],
+  emits: ['close', 'send-form'],
+  props: {
+    isModal: {
+      type: Boolean,
+      required: true
+    }
+  },
   data() {
     return {
       dialogVisible: false,
@@ -91,9 +98,9 @@ export default defineComponent({
         prepaid: 0,
         paidstate: 0
       } as Tasks.Task,
-      workTasks: [] as Tasks.workTask[],
-      parts: [] as Tasks.partTask[],
-      notes: [] as Tasks.noteTask[]
+      workTasks: [{ name: '', price: 0 }] as Tasks.workTask[],
+      parts: [{ name: '', price: 0, result_price: 0 }] as Tasks.partTask[],
+      notes: [{ description: '' }] as Tasks.noteTask[]
     }
   },
   methods: {
@@ -123,7 +130,21 @@ export default defineComponent({
         { parts: parts },
         { notes: notes }
       )
+
       this.$emit('send-form', fullform)
+    },
+    clearForm() {
+      this.form = {
+        mark: '',
+        num: '',
+        vin: '',
+        date: '',
+        prepaid: 0,
+        paidstate: 0
+      } as Tasks.Task
+      this.workTasks = [{ name: '', price: 0 }] as Tasks.workTask[]
+      this.parts = [{ name: '', price: 0, result_price: 0 }] as Tasks.partTask[]
+      this.notes = [{ description: '' }] as Tasks.noteTask[]
     }
   }
 })
