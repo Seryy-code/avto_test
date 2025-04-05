@@ -26,4 +26,16 @@ declare module Tasks {
     // id: number
     description: string
   }
+  interface Form {
+    id: number
+    mark: string
+    num: string
+    vin: string
+    date: string
+    workTasks: { name: string; price: number }[]
+    parts: { name: string; price: number; result_price: number }[]
+    prepaid: number
+    notes: { description: string }[]
+    paidstate: number
+  }
 }
