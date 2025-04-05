@@ -1,7 +1,11 @@
 import axios from 'axios'
 
-const baseURL = import.meta.env.PROD ? 'http://admin.devtowns.ru/' : 'http://admin.devtowns.ru/'
+const baseURL = import.meta.env.PROD ? 'http://localhost:3000/api' : 'http://localhost:3000/api'
 
 export const httpClient = axios.create({
-  baseURL
+  baseURL,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 })
