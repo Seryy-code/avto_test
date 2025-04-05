@@ -8,6 +8,14 @@
       :is-modal="state.isAddModal"
       v-if="state.isAddModal"
     />
+
+    <FormEditModal
+      @send-form="updateRow"
+      @close="closeEditModal"
+      :row="element"
+      :is-modal="state.isEditModal"
+      v-if="state.isEditModal"
+    />
   </div>
 
   <el-table class="before:z-0" :data="tableData" style="width: 100%">
@@ -18,35 +26,35 @@
     <el-table-column label="Описание работы">
       <template #default="{ row }">
         <div>
-          <p v-for="workTask in row.workTasks">{{ workTask.name }}</p>
+          <p v-for="WorkTasks in row.WorkTasks">{{ WorkTasks.name }}</p>
         </div>
       </template>
     </el-table-column>
     <el-table-column label="Cтоимость работы">
       <template #default="{ row }">
         <div>
-          <p v-for="workTask in row.workTasks">{{ workTask.price }}</p>
+          <p v-for="WorkTasks in row.WorkTasks">{{ WorkTasks.price }}</p>
         </div>
       </template>
     </el-table-column>
     <el-table-column label="Запчасти">
       <template #default="{ row }">
         <div>
-          <p v-for="part in row.parts">{{ part.name }}</p>
+          <p v-for="PartTasks in row.PartTasks">{{ PartTasks.name }}</p>
         </div>
       </template>
     </el-table-column>
     <el-table-column label="Cтоимость запчастей">
       <template #default="{ row }">
         <div>
-          <p v-for="part in row.parts">{{ part.price }}</p>
+          <p v-for="PartTasks in row.PartTasks">{{ PartTasks.price }}</p>
         </div>
       </template>
     </el-table-column>
     <el-table-column label="Cтоимость запчастей +20%">
       <template #default="{ row }">
         <div>
-          <p v-for="part in row.parts">{{ part.result_price }}</p>
+          <p v-for="PartTasks in row.PartTasks">{{ PartTasks.result_price }}</p>
         </div>
       </template>
     </el-table-column>
@@ -55,13 +63,19 @@
     <el-table-column label="Блокнот">
       <template #default="{ row }">
         <div>
-          <p v-for="note in row.notes">{{ note.description }}</p>
+          <p v-for="NoteTasks in row.NoteTasks">{{ NoteTasks.description }}</p>
         </div>
       </template>
     </el-table-column>
     <el-table-column prop="" label="Изменение">
       <template #default="{ row }">
-        <el-button @click="openDeleteModal(row)" type="danger" plain> Удалить </el-button>
+        <el-button @click="openDeleteModal(row)" type="danger" plain>
+          <el-icon><Delete /></el-icon>
+        </el-button>
+
+        <el-button @click="openEditModal(row)" type="action">
+          <el-icon><Edit /></el-icon>
+        </el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -78,6 +92,7 @@
 <script lang="ts">
 import FormAddModal from '@/components/FormAddModal/FormAddModal.vue'
 import FormDeleteModal from '@/components//FormDeleteModal/FormDeleteModal.vue'
+import FormEditModal from '@/components/FormEditModal/FormEditModal.vue'
 import { useTableStore } from '@/stores/TableStore'
 import { defineComponent, onMounted } from 'vue'
 
@@ -86,31 +101,51 @@ export default defineComponent({
     return {
       tableData: [] as Tasks.Task[],
       receivedRow: {} as Tasks.Task,
-      element: {} as Tasks.Task,
+      element: {
+        mark: '',
+        num: '',
+        vin: '',
+        date: '',
+        prepaid: 0,
+        paidstate: 0,
+        WorkTasks: [],
+        PartTasks: [],
+        NoteTasks: []
+      } as unknown as Tasks.Task,
       state: {
         isDeleteModal: false,
-        isAddModal: false
+        isAddModal: false,
+        isEditModal: false
       }
     }
   },
   components: {
     FormAddModal,
-    FormDeleteModal
+    FormDeleteModal,
+    FormEditModal
   },
   methods: {
     giveRow(data: Tasks.Task) {
       this.receivedRow = data
     },
-    addRow(newRow: Tasks.Task) {
+    async addRow(newRow: Tasks.Task) {
       this.state.isAddModal = false
       this.tableData.push(newRow)
     },
-    deleteRow(element: Tasks.Task) {
+    async deleteRow(element: Tasks.Task) {
       this.state.isDeleteModal = false
       const index = this.tableData.indexOf(element)
       if (index !== -1) {
         this.tableData.splice(index, 1)
       }
+    },
+    async updateRow(element: Tasks.Task) {
+      this.state.isEditModal = false
+      const tableStore = useTableStore()
+      console.log('Компонент смонтирован, начало выполнения updateRow')
+      await tableStore.updateTask(element)
+      this.tableData = tableStore.tasks
+      console.log('Завершение выполнения updateRow : ', this.tableData)
     },
     openAddModal() {
       this.state.isAddModal = true
@@ -125,6 +160,14 @@ export default defineComponent({
     },
     closeDeleteModal() {
       this.state.isDeleteModal = false
+    },
+    openEditModal(element: Tasks.Task) {
+      console.log(element)
+      this.element = element
+      this.state.isEditModal = true
+    },
+    closeEditModal() {
+      this.state.isEditModal = false
     }
   },
   watch: {
@@ -133,16 +176,12 @@ export default defineComponent({
       this.addRow(newVal)
     }
   },
-  setup() {
+  async mounted() {
     const tableStore = useTableStore()
-
-    onMounted(async () => {
-      console.log('Компонент смонтирован, начало выполнения getAllTasks')
-      await tableStore.getAllTasks(1)
-      console.log('Завершение выполнения getAllTasks')
-    })
-
-    return { tableStore }
+    console.log('Компонент смонтирован, начало выполнения getAllTasks')
+    await tableStore.getAllTasks(0)
+    this.tableData = tableStore.tasks
+    console.log('Завершение выполнения getAllTasks : ', this.tableData)
   }
 })
 </script>
